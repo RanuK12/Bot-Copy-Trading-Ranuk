@@ -1,0 +1,8 @@
+
+This will automatically close positions when losses reach 5%.
+
+### Examples
+
+- 10% stop-loss: `python trading_engine.py --stop-loss 10`
+- 2% stop-loss: `python trading_engine.py --stop-loss 2`
+- No stop-loss: `python trading_engine.py`
