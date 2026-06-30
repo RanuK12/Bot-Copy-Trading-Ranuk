@@ -132,6 +132,12 @@ def generate(
     duration_min = (end_ts - session_start) / 60
     recs = _recommendations(per_strat)
 
+    stop_loss_pct = rsnap.get("stop_loss_pct", 0.0)
+    stop_loss_kpi = (
+        f'<span class="kpi"><div class="v">{stop_loss_pct:.1f}%</div>'
+        f'    <div class="l">stop-loss</div></span>'
+    ) if stop_loss_pct > 0 else ""
+
     strat_rows = "".join(
         "<tr>"
         f"<td>{html.escape(name)}</td>"
@@ -186,6 +192,7 @@ def generate(
     <div class="l">duration</div></span>
   <span class="kpi"><div class="v">${rsnap['equity']:.2f}</div>
     <div class="l">equity</div></span>
+  {stop_loss_kpi}
 </div>
 
 <h2>Equity curve</h2>

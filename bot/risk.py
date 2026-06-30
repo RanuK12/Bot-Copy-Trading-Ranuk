@@ -14,6 +14,7 @@ Circuit breakers implemented
 * N consecutive losses       (``max_consecutive_losses``) -> pause strat 1h
 * API error streak           (``api_error_pause_threshold``) -> global pause
 * Remote kill-switch         (``trigger_kill_switch``)
+* Global stop-loss pct       (``set_stop_loss``)
 """
 
 from __future__ import annotations
@@ -53,6 +54,9 @@ class RiskState:
     global_paused_until: float = 0.0
     kill_switch: bool = False
 
+    # Stop-loss
+    stop_loss_pct: float = 0.0  # 0 means disabled
+
     # Rollover markers
     day_bucket: str = ""
     month_bucket: str = ""
@@ -87,6 +91,37 @@ class RiskManager:
     def release_kill_switch(self) -> None:
         self.state.kill_switch = False
         log.warning("[yellow]Kill switch released.[/]")
+
+    # ------------------------------------------------------------------
+    # Stop-loss (set via --stop-loss CLI flag or runtime command)
+    # ------------------------------------------------------------------
+    def set_stop_loss(self, pct: float) -> None:
+        """Set the global stop-loss percentage (e.g. 5.0 means -5 %).
+
+        A value of ``0`` disables the stop-loss.  The position monitor
+        should call :meth:`stop_loss_triggered` with the current
+        unrealised loss percentage of each open position.
+        """
+        if pct < 0:
+            log.warning(f"[yellow]Ignoring negative stop-loss value {pct}.[/]")
+            return
+        self.state.stop_loss_pct = pct
+        if pct > 0:
+            log.info(f"[cyan]Stop-loss set to {pct:.2f}%.[/]")
+        else:
+            log.info("[cyan]Stop-loss disabled.[/]")
+
+    def stop_loss_triggered(self, unrealised_loss_pct: float) -> bool:
+        """Return ``True`` if the given unrealised loss exceeds the stop-loss.
+
+        ``unrealised_loss_pct`` should be a **positive** number representing
+        the magnitude of the loss (e.g. ``7.5`` means the position is down
+        7.5 %).  Returns ``False`` when no stop-loss is configured (value is
+        0) or when the loss has not yet breached the threshold.
+        """
+        if self.state.stop_loss_pct <= 0:
+            return False
+        return unrealised_loss_pct >= self.state.stop_loss_pct
 
     # ------------------------------------------------------------------
     # API error tracking (called by clients on success/failure)
@@ -271,6 +306,7 @@ class RiskManager:
                 if until > time.time()
             },
             "api_error_streak": self.state.api_error_streak,
+            "stop_loss_pct": self.state.stop_loss_pct,
         }
 
 
