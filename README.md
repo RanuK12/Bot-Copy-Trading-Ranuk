@@ -213,9 +213,51 @@ Ranuk-Copy-Trading/
 * The Telegram `/emergencystop` flips a kill switch that blocks **all**
   new orders instantly. Already-resting GTC orders are untouched; use
   the Polymarket UI or an operator script to cancel them if needed.
-* This is a personal-use tool. It is **not** financial advice and
-  **not** audited. Run it in paper mode first, expect bugs, never
-  risk more than you can afford to lose.
+* **⚠️ DISCLAIMER — READ BEFORE USING:** This software is provided
+  "as is", without warranty of any kind. It is **not** financial
+  advice, **not** audited by a third party, and **not** guaranteed
+  to be profitable. The authors and contributors assume **zero
+  liability** for any financial losses incurred through its use.
+  Run it in paper mode first for at least 30 days, expect bugs,
+  and never risk more than you can afford to lose. If you do not
+  understand the Polymarket CLOB or the source code, do **not**
+  run this bot with real USDC.
+
+---
+
+## Risk & Limitations
+
+This is an **early-stage, unaudited codebase**. Before using this bot
+with real money, understand the following:
+
+* **No independent audit** — the code has not been reviewed by a
+  third-party security firm. Smart-contract interactions, key
+  management, and order execution may contain bugs.
+* **No reproducible backtests published.** The backtest harness
+  (`bot/backtest/engine.py`) exists in the architecture but has not
+  been run against a full historical dataset with published results.
+  Past performance cannot be extrapolated.
+* **Polymarket-specific risk.** Polymarket markets are illiquid
+  compared to centralized exchanges. Slippage, spread-widening, and
+  partial fills are common. The CLOB order book can move against you
+  between scans.
+* **Polygon chain risk.** Reorgs, RPC failures, and gas spikes can
+  delay or invalidate transactions. The bot includes RPC failover but
+  cannot eliminate chain-level risk.
+* **Smart-copy ≠ guaranteed profit.** The Smart-Copy strategy
+  follows wallet addresses that have performed well historically.
+  Past wallet performance does not predict future results; the
+  tracked wallets may change behavior, exit positions silently, or
+  be trading on information you don't have.
+* **Paper mode is simulated.** [SIMULADO] mode uses the same code
+  paths as live but does **not** account for real-world fill
+  dynamics, mempool competition, or CLOB latency.
+
+**Bottom line:** Never risk more than you can afford to lose.
+Start in paper mode for at least 30 days. This is a tool for
+sophisticated users who understand the Polymarket CLOB and are
+comfortable reading the source code before trusting their capital
+to it.
 
 ---
 
